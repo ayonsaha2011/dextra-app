@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Brain, HomeIcon, Wallet2Icon } from 'lucide-react';
+import { Bookmark, Brain, HomeIcon, Wallet2Icon } from 'lucide-react';
 
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
@@ -71,6 +71,13 @@ const ExploreItems = [
     url: '/memories',
     segment: 'memories',
     icon: Brain,
+    external: false,
+  },
+  {
+    title: 'Saved Prompts',
+    url: '/saved-prompts',
+    segment: 'saved-prompts',
+    icon: Bookmark,
     external: false,
   },
   // {
