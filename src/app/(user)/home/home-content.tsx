@@ -52,12 +52,16 @@ function SectionTitle({ children }: SectionTitleProps) {
   );
 }
 
+interface Suggestion {
+  [key: string]: any;
+}
+
 export function HomeContent() {
   const pathname = usePathname();
-  const suggestions = useMemo(() => getRandomSuggestions(4), []);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showChat, setShowChat] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [chatId, setChatId] = useState(() => uuidv4());
+  const [chatId, setChatId] = useState<string | null>(null);
   const { user, isLoading } = useUser();
   const [verifyingTx, setVerifyingTx] = useState<string | null>(null);
   const [verificationAttempts, setVerificationAttempts] = useState(0);
@@ -65,15 +69,20 @@ export function HomeContent() {
 
   const { conversations, refreshConversations } = useConversations(user?.id);
 
+  useEffect(() => {
+    setChatId(uuidv4());
+    setSuggestions(getRandomSuggestions(4));
+  }, []);
+
   const resetChat = useCallback(() => {
     setShowChat(false);
     setChatId(uuidv4());
   }, []);
 
   const { messages, input, handleSubmit, setInput } = useChat({
-    id: chatId,
+    id: chatId ?? undefined,
     initialMessages: [],
-    body: { id: chatId },
+    body: { id: chatId ?? undefined },
     onFinish: () => {
       // Only refresh if we have a new conversation that's not in the list
       if (chatId && !conversations?.find((conv) => conv.id === chatId)) {
@@ -245,29 +254,29 @@ export function HomeContent() {
         <TypingAnimation
           className="mb-12 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-center text-4xl font-semibold tracking-tight text-transparent md:text-4xl lg:text-5xl"
           duration={50}
-          text="How can I assist you?"
+          text="I'm Dextra, How may I assist you?"
         />
       </BlurFade>
 
       <div className="mx-auto w-full max-w-3xl space-y-8">
-        <BlurFade delay={0.1}>
-          <ConversationInput
-            value={input}
-            onChange={setInput}
-            onSubmit={handleSend}
-          />
-        </BlurFade>
-
         {hasEAP && (
           <div className="space-y-8">
+            <BlurFade delay={0.4}>
+              <div className="space-y-2">
+                <SectionTitle>Abilities</SectionTitle>
+                <IntegrationsGrid />
+              </div>
+            </BlurFade>
             <BlurFade delay={0.2}>
               <div className="space-y-2">
                 <SectionTitle>Suggestions</SectionTitle>
                 <div className="grid grid-cols-2 gap-4">
                   {suggestions.map((suggestion, index) => (
                     <SuggestionCard
-                      key={suggestion.title}
-                      {...suggestion}
+                      key={suggestion.id}
+                      id={suggestion.id}
+                      title={suggestion.title}
+                      subtitle={suggestion.subtitle}
                       delay={0.3 + index * 0.1}
                       onSelect={setInput}
                     />
@@ -275,15 +284,15 @@ export function HomeContent() {
                 </div>
               </div>
             </BlurFade>
-
-            <BlurFade delay={0.4}>
-              <div className="space-y-2">
-                <SectionTitle>Integrations</SectionTitle>
-                <IntegrationsGrid />
-              </div>
-            </BlurFade>
           </div>
         )}
+        <BlurFade delay={0.1}>
+          <ConversationInput
+            value={input}
+            onChange={setInput}
+            onSubmit={handleSend}
+          />
+        </BlurFade>
       </div>
     </div>
   );
@@ -340,7 +349,7 @@ export function HomeContent() {
 
                 <div className="flex items-center justify-between gap-4">
                   <Link
-                    href="https://x.com/neur_sh"
+                    href="https://x.com/dextra"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
@@ -376,14 +385,14 @@ export function HomeContent() {
       {!showChat && (
         <div
           className={cn(
-            'absolute inset-0 overflow-y-auto overflow-x-hidden transition-opacity duration-300 ',
+            'absolute inset-0 overflow-y-auto overflow-x-hidden transition-opacity duration-300',
             showChat ? 'pointer-events-none opacity-0' : 'opacity-100',
           )}
         >
           {mainContent}
         </div>
       )}
-      {showChat && (
+      {showChat && chatId && (
         <div
           className={cn(
             'absolute inset-0 transition-opacity duration-300',

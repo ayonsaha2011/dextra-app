@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -46,9 +46,9 @@ import {
 } from '@/components/ui/sidebar';
 import { useActions } from '@/hooks/use-actions';
 import { useUser } from '@/hooks/use-user';
+import { NO_CONFIRMATION_MESSAGE } from '@/lib/constants';
 import { EVENTS } from '@/lib/events';
 import { cn } from '@/lib/utils';
-import { NO_CONFIRMATION_MESSAGE } from '@/lib/constants';
 
 interface ActionMenuItemProps {
   action: Action;
@@ -196,7 +196,9 @@ const ActionMenuItem = ({ action, onDelete, onEdit }: ActionMenuItemProps) => {
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    frequency: e.target.value ? parseInt(e.target.value, 10) : null, // Parse or null
+                    frequency: e.target.value
+                      ? parseInt(e.target.value, 10)
+                      : null, // Parse or null
                   }))
                 }
                 placeholder="Enter frequency in seconds"
@@ -212,7 +214,9 @@ const ActionMenuItem = ({ action, onDelete, onEdit }: ActionMenuItemProps) => {
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    maxExecutions: e.target.value ? parseInt(e.target.value, 10) : null, // Parse or null
+                    maxExecutions: e.target.value
+                      ? parseInt(e.target.value, 10)
+                      : null, // Parse or null
                   }))
                 }
                 placeholder="Enter max executions"
@@ -256,13 +260,13 @@ export const AppSidebarAutomations = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   // Listen for action creation events
-  const handleActionMutation = async () => {
+  const handleActionMutation = useCallback(async () => {
     try {
       await refreshActions();
     } catch (error) {
       console.error('[Sidebar] Error refreshing actions:', error);
     }
-  };
+  }, [refreshActions]);
 
   useEffect(() => {
     window.addEventListener(EVENTS.ACTION_CREATED, handleActionMutation);
@@ -272,7 +276,7 @@ export const AppSidebarAutomations = () => {
       window.removeEventListener(EVENTS.ACTION_CREATED, handleActionMutation);
       window.removeEventListener(EVENTS.ACTION_REFRESH, handleActionMutation);
     };
-  }, [refreshActions]);
+  }, [handleActionMutation]);
 
   // Add effect to log actions changes
   useEffect(() => {}, [actions]);

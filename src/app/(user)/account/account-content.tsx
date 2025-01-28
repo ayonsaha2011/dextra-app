@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useOptimistic } from 'react';
+import { startTransition, useEffect, useOptimistic, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -88,13 +88,57 @@ export function AccountContent() {
     },
   });
 
-  if (isUserLoading || isWalletsLoading || !user) {
+  const [privyError, setPrivyError] = useState<Error | null>(null);
+
+  // Add error handling for Privy initialization
+  useEffect(() => {
+    if (!ready && !isUserLoading) {
+      const timeoutId = setTimeout(() => {
+        setPrivyError(new Error('Failed to initialize Privy authentication'));
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [ready, isUserLoading]);
+
+  // Show error state if Privy fails to initialize
+  if (privyError) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <h2 className="mb-2 text-lg font-semibold">Authentication Error</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            We&apos;re having trouble connecting to our authentication service.
+            Please try:
+          </p>
+          <ul className="mb-4 text-sm text-muted-foreground">
+            <li>Refreshing the page</li>
+            <li>Checking your internet connection</li>
+            <li>Disabling any ad blockers</li>
+          </ul>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isUserLoading || isWalletsLoading || !user || !ready) {
     return <LoadingStateSkeleton />;
   }
+
+  // Show wallet error in a more user-friendly way
   if (walletsError) {
     return (
-      <div className="p-4 text-sm text-red-500">
-        Failed to load wallets: {walletsError.message}
+      <div className="flex h-full w-full flex-col items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <h2 className="mb-2 text-lg font-semibold">Failed to Load Wallets</h2>
+          <p className="text-sm text-muted-foreground">
+            {walletsError.message}. Please try refreshing the page.
+          </p>
+        </div>
       </div>
     );
   }

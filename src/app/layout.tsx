@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Neur',
-    default: 'Neur - The Intelligent Copilot for Solana',
+    template: '%s | Dextra',
+    default: 'Dextra - The Intelligent Copilot for Solana',
   },
   description: 'The Intelligent Copilot elevating your Solana experience.',
 
@@ -39,16 +39,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={cn(
           `${geistSans.variable} ${geistMono.variable}`,
-          'overflow-x-hidden antialiased',
+          'min-h-screen bg-background font-sans antialiased',
         )}
       >
         <AuthProviders>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="light"
             disableTransitionOnChange
           >
             <main className="sticky bottom-0 overflow-hidden md:overflow-visible">

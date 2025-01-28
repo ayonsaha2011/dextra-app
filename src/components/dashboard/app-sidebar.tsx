@@ -1,9 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { BookOpen, Brain, HomeIcon } from 'lucide-react';
+import { Brain, HomeIcon, Wallet2Icon } from 'lucide-react';
 
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
@@ -29,21 +30,14 @@ const AppSidebarHeader = () => {
     <SidebarHeader>
       <div className="flex items-center justify-between px-1">
         <span className="pl-2 text-lg font-medium tracking-tight group-data-[collapsible=icon]:hidden">
-          neur.sh
+          <Image
+            src="/logo.svg"
+            alt="Dextra"
+            width={500}
+            height={300}
+            className="h-6 w-auto"
+          />
         </span>
-        <div className="flex items-center gap-1.5">
-          <ThemeToggle />
-          <div className="flex items-center gap-1.5 group-data-[collapsible=icon]:hidden">
-            {IS_BETA && (
-              <span className="select-none rounded-md bg-primary/90 px-1.5 py-0.5 text-xs text-primary-foreground">
-                BETA
-              </span>
-            )}
-            <span className="select-none rounded-md bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-              {APP_VERSION}
-            </span>
-          </div>
-        </div>
       </div>
     </SidebarHeader>
   );
@@ -66,11 +60,11 @@ const ExploreItems = [
     external: false,
   },
   {
-    title: 'Docs',
-    url: 'https://docs.neur.sh',
-    segment: 'docs',
-    icon: BookOpen,
-    external: true,
+    title: 'Wallet',
+    url: '/wallet',
+    segment: 'wallet',
+    icon: Wallet2Icon,
+    external: false,
   },
   {
     title: 'Memories',
@@ -112,7 +106,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Explore</SidebarGroupLabel>
+            <SidebarGroupLabel>DISCOVER</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {ExploreItems.map((item) => (

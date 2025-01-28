@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 import { ExternalLink } from 'lucide-react';
 import { z } from 'zod';
 
@@ -228,11 +230,12 @@ const PopularCollections = ({
           >
             <div className="flex items-center gap-4 rounded-lg bg-background/50 p-3 hover:bg-background/80">
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
-                <img
+                <Image
                   src={processImageUrl(collection.image)}
                   alt={collection.name}
+                  width={48}
+                  height={48}
                   className="h-full w-full object-cover"
-                  loading="lazy"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = Placeholder.nft();
                   }}

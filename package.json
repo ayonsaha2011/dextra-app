@@ -1,10 +1,10 @@
 {
-  "name": "neur-app",
+  "name": "dextra-app",
   "version": "0.2.2",
   "private": true,
   "scripts": {
     "vercel-build": "NODE_OPTIONS=--max_old_space_size=2048 pnpm npx prisma generate && next build",
-    "dev": "NODE_NO_WARNINGS=1 next dev --turbopack",
+    "dev": "cross-env NODE_NO_WARNINGS=1 next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -89,15 +89,18 @@
     "@types/node": "^20.17.14",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
-    "eslint": "^9.18.0",
-    "eslint-config-next": "15.1.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "latest",
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "prisma": "^6.2.1",
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.3"
+    "typescript": "^5.0.0",
+    "cross-env": "^7.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0"
   },
   "packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf"
 }

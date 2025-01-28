@@ -14,7 +14,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  earlyAccess Boolean @default(false)
+  earlyAccess Boolean @default(true)
   degenMode  Boolean @default(false)
 
   wallets       Wallet[]

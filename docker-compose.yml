@@ -1,58 +1,58 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  neur-app:
+  dextra-app:
     build:
       context: .
       dockerfile: Dockerfile.local
       target: dev
-    container_name: "neur-app"
+    container_name: 'dextra-app'
     depends_on:
-      neur-db:
+      dextra:
         condition: service_healthy
     expose:
-      - "3000"
+      - '3000'
     ports:
-      - "3000:3000"
+      - '3000:3000'
     working_dir: /usr/src/app
-    command: "/bin/bash ./local_entrypoint.sh"
+    command: '/bin/bash ./local_entrypoint.sh'
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@neur-db:5432/neurdb
-      - DIRECT_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@neur-db:5432/neurdb
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@dextra:5432/dextra
+      - DIRECT_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@dextra:5432/dextra
     volumes:
       - .:/usr/src/app
       - root_node_modules:/usr/src/app/node_modules
       - webapp_next:/usr/src/app/.next
 
-  neur-studio:
+  dextra-studio:
     build:
       context: .
       dockerfile: Dockerfile.local
       target: dev
-    container_name: "neur-studio"
+    container_name: 'dextra-studio'
     depends_on:
-      neur-db:
+      dextra:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@neur-db:5432/neurdb
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@dextra:5432/dextra
     expose:
-      - "5555"
+      - '5555'
     ports:
-      - "5555:5555"
+      - '5555:5555'
     working_dir: /usr/src/app
-    command: "pnpm npx prisma studio"
+    command: 'pnpm npx prisma studio'
     volumes:
       - .:/usr/src/app
       - root_node_modules:/usr/src/app/node_modules
       - webapp_next:/usr/src/app/.next
 
-  neur-db:
-    image: "postgres:15"
-    container_name: "neur-db"
+  dextra:
+    image: 'postgres:15'
+    container_name: 'dextra'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -60,11 +60,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
-      - "neur-db-data:/var/lib/postgresql/data"
+      - 'dextra-data:/var/lib/postgresql/data'
 
 volumes:
-  neur-db-data:
+  dextra-data:
   root_node_modules:
   webapp_next:

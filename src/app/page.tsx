@@ -7,15 +7,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { useLogin } from '@privy-io/react-auth';
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { RiTwitterXFill } from '@remixicon/react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   ActivityIcon,
-  BookOpenIcon,
   BrainCircuitIcon,
   LinkIcon,
-  ShieldIcon,
   ZapIcon,
 } from 'lucide-react';
 
@@ -30,11 +27,15 @@ import { IntegrationsBackground } from '@/components/ui/integrations-background'
 import Marquee from '@/components/ui/marquee';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import { cn } from '@/lib/utils';
+import { LucideIcon } from '@/types/icons';
 
-const navItems = [
-  { label: 'Github', href: 'https://git.new/neur', icon: GitHubLogoIcon },
-  { label: 'Docs', href: 'https://docs.neur.sh', icon: BookOpenIcon },
-];
+interface NavItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+}
+
+const navItems: NavItem[] = [];
 
 const Header = ({ handleLogin }: { handleLogin: () => void }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -60,7 +61,6 @@ const Header = ({ handleLogin }: { handleLogin: () => void }) => {
                       rel="noopener noreferrer"
                       className="group relative flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                     >
-                      <Icon className="h-4 w-4" />
                       {item.label}
                       <span className="absolute inset-x-4 -bottom-px h-px scale-x-0 bg-gradient-to-r from-primary/0 via-primary/70 to-primary/0 transition-transform duration-300 group-hover:scale-x-100" />
                     </a>
@@ -118,7 +118,6 @@ const Header = ({ handleLogin }: { handleLogin: () => void }) => {
                       className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <Icon className="h-4 w-4" />
                       {item.label}
                     </a>
                   );
@@ -151,7 +150,7 @@ const Hero = ({ handleLogin }: { handleLogin: () => void }) => {
           <BlurFade delay={0.3} className="pointer-events-none select-none">
             <div className="inline-flex items-center rounded-full border border-primary/20 bg-muted/80 px-4 py-1.5 shadow-lg backdrop-blur-sm">
               <span className="text-sm font-medium text-primary">
-                ✨ Introducing Neur Agent
+                ✨ Introducing Dextra Agent
               </span>
             </div>
 
@@ -209,7 +208,7 @@ const Hero = ({ handleLogin }: { handleLogin: () => void }) => {
                 <div className="relative dark:hidden">
                   <Image
                     src="/product.png"
-                    alt="Neur AI Interface"
+                    alt="Dextra AI Interface"
                     width={1200}
                     height={675}
                     className="w-full rounded-2xl"
@@ -220,7 +219,7 @@ const Hero = ({ handleLogin }: { handleLogin: () => void }) => {
                 <div className="relative hidden dark:block">
                   <Image
                     src="/product_dark.png"
-                    alt="Neur AI Interface"
+                    alt="Dextra AI Interface"
                     width={1200}
                     height={675}
                     className="w-full rounded-2xl"
@@ -295,23 +294,11 @@ const features = [
     background: <IntegrationsBackground />,
   },
   {
-    Icon: GitHubLogoIcon,
-    name: 'Open Source & Community Driven',
-    description:
-      'Built with transparency and collaboration in mind. Our full-stack application is completely open source, community-driven, and welcomes contributions from developers worldwide to shape the future of Solana AI tools.',
-    className: 'col-span-1 sm:col-span-3 lg:col-span-1',
-    background: (
-      <div className="absolute inset-0 flex items-center justify-center opacity-20">
-        <div className="h-32 w-32 animate-pulse rounded-full border-4 border-accent"></div>
-      </div>
-    ),
-  },
-  {
     Icon: ActivityIcon,
     name: 'AI-Driven Automations & Agents',
     description:
       'Revolutionize your workflows with powerful AI agents and custom automations designed to handle complex tasks. *Coming soon* to streamline your operations even further.',
-    className: 'col-span-1 sm:col-span-3 lg:col-span-2',
+    className: 'col-span-1 sm:col-span-3 lg:col-span-3',
     background: (
       <div className="absolute inset-0 flex items-center justify-center opacity-20">
         <div className="h-32 w-32 animate-pulse rounded-full border-4 border-accent"></div>
@@ -357,10 +344,10 @@ const Footer = () => {
         delay={0.5}
         className="flex items-center justify-center gap-3 text-sm text-muted-foreground"
       >
-        <p>© 2024 Neur. All rights reserved.</p>
+        <p>© 2025 Dextra. All rights reserved.</p>
         <span>|</span>
         <Link
-          href="https://x.com/neur_sh"
+          href="https://x.com/dextra_sh"
           target="_blank"
           title="Follow us on X"
           className="transition-colors hover:scale-105 hover:text-primary"
@@ -389,7 +376,7 @@ export default function Home() {
 
   if (isMaintenanceMode) {
     login = () => {
-      window.location.href = 'https://x.com/neur_sh';
+      window.location.href = 'https://x.com/dextra_sh';
     };
   }
 
