@@ -1,6 +1,7 @@
 'use client';
 
-import { startTransition, useEffect, useOptimistic, useState } from 'react';
+import { startTransition, useOptimistic } from 'react';
+import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -15,9 +16,12 @@ import {
 } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import { HelpCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { mutate } from 'swr';
 
 import { WalletCard } from '@/components/dashboard/wallet-card';
+import { ReferralSection } from '@/components/referral-section';
+import { SubscriptionSection } from '@/components/subscription/subscription-section';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,7 +37,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useUser } from '@/hooks/use-user';
 import { useEmbeddedWallets } from '@/hooks/use-wallets';
-import { cn } from '@/lib/utils';
+import { IS_SUBSCRIPTION_ENABLED, cn } from '@/lib/utils';
 import {
   formatPrivyId,
   formatUserCreationDate,
@@ -41,6 +45,11 @@ import {
   truncate,
 } from '@/lib/utils/format';
 import { getUserID, grantDiscordRole } from '@/lib/utils/grant-discord-role';
+import {
+  reactivateUser,
+  subscribeUser,
+  unsubscribeUser,
+} from '@/server/actions/subscription';
 import { type UserUpdateData, updateUser } from '@/server/actions/user';
 import { EmbeddedWallet } from '@/types/db';
 
@@ -49,6 +58,9 @@ import { LoadingStateSkeleton } from './loading-skeleton';
 export function AccountContent() {
   const router = useRouter();
   const { ready } = usePrivy();
+  const [isUpdatingReferralCode, setIsUpdatingReferralCode] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
   const {
     isLoading: isUserLoading,
     user,
@@ -88,44 +100,95 @@ export function AccountContent() {
     },
   });
 
-  const [privyError, setPrivyError] = useState<Error | null>(null);
+  const handleSubscribe = async () => {
+    if (!privyUser?.wallet?.address) return;
 
-  // Add error handling for Privy initialization
-  useEffect(() => {
-    if (!ready && !isUserLoading) {
-      const timeoutId = setTimeout(() => {
-        setPrivyError(new Error('Failed to initialize Privy authentication'));
-      }, 10000); // 10 second timeout
+    try {
+      setIsSubscribing(true);
+      const response = await subscribeUser();
 
-      return () => clearTimeout(timeoutId);
+      if (response?.data?.success) {
+        toast.success('Subscribed successfully');
+      } else if (response?.data?.error) {
+        toast.error('Failed to subscribe', {
+          description: response.data.error,
+        });
+      }
+    } catch (error) {
+      toast.error('Failed to subscribe', {
+        description: 'Could not subscribe due to an unknown error',
+      });
+    } finally {
+      setIsSubscribing(false);
+      handleUpdateUser({});
     }
-  }, [ready, isUserLoading]);
+  };
 
-  // Show error state if Privy fails to initialize
-  if (privyError) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center p-4">
-        <div className="max-w-md text-center">
-          <h2 className="mb-2 text-lg font-semibold">Authentication Error</h2>
-          <p className="mb-4 text-sm text-muted-foreground">
-            We&apos;re having trouble connecting to our authentication service.
-            Please try:
-          </p>
-          <ul className="mb-4 text-sm text-muted-foreground">
-            <li>Refreshing the page</li>
-            <li>Checking your internet connection</li>
-            <li>Disabling any ad blockers</li>
-          </ul>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Refresh Page
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const handleReactivate = async () => {
+    if (!privyUser?.wallet?.address) return;
 
-  // Show loading state
-  if (isUserLoading || isWalletsLoading || !user || !ready) {
+    try {
+      setIsSubscribing(true);
+      const response = await reactivateUser();
+
+      if (response?.data?.success) {
+        toast.success('Reactivated subscription');
+      } else if (response?.data?.error) {
+        toast.error('Failed to reactivate subscription', {
+          description: response.data.error,
+        });
+      }
+    } catch (error) {
+      toast.error('Failed to reactivate subscription', {
+        description: 'Could not subscribe due to an unknown error',
+      });
+    } finally {
+      setIsSubscribing(false);
+      handleUpdateUser({});
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    if (!privyUser?.wallet?.address) return;
+
+    try {
+      setIsSubscribing(true);
+      const response = await unsubscribeUser();
+
+      if (response?.data?.success) {
+        toast.success('Unsubscribed successfully');
+      } else if (response?.data?.error) {
+        toast.error('Failed to unsubscribe', {
+          description: response.data.error,
+        });
+      }
+    } catch (error) {
+      toast.error('Failed to unsubscribe', {
+        description: 'Could not unsubscribe due to an unknown error',
+      });
+    } finally {
+      setIsSubscribing(false);
+      handleUpdateUser({});
+    }
+  };
+
+  const handleUpdateReferralCode = async (referralCode: string) => {
+    try {
+      const result = await handleUpdateUser({
+        referralCode,
+      });
+
+      if (result.success) {
+        toast.success('Referral code updated');
+      } else {
+        toast.error(result.error || 'Failed to update referral code');
+      }
+    } catch (err) {
+      toast.error('Failed to update referral code');
+    }
+  };
+
+  if (isUserLoading || isWalletsLoading || !user) {
     return <LoadingStateSkeleton />;
   }
 
@@ -160,6 +223,8 @@ export function AccountContent() {
   const legacyWallets = embeddedWallets.filter(
     (w: EmbeddedWallet) => w.walletSource === 'CUSTOM' && w.chain === 'SOLANA',
   );
+
+  const activeWallet = embeddedWallets.find((w) => w.active);
 
   const allUserLinkedAccounts = privyUser?.linkedAccounts || [];
   const linkedSolanaWallet = allUserLinkedAccounts.find(
@@ -197,6 +262,8 @@ export function AccountContent() {
     if (result.success) {
       await mutate(`user-${userData.privyId}`);
     }
+
+    return result;
   };
 
   return (
@@ -256,7 +323,7 @@ export function AccountContent() {
                           {user?.earlyAccess ? 'Active' : 'Not Active'}
                         </span>
 
-                        {!user?.earlyAccess && (
+                        {!user?.earlyAccess && !IS_SUBSCRIPTION_ENABLED && (
                           <div className="ml-auto">
                             <Button
                               variant="default"
@@ -306,6 +373,13 @@ export function AccountContent() {
               </CardContent>
             </Card>
           </section>
+
+          {/* Referrals */}
+          <ReferralSection
+            referralCode={user?.referralCode}
+            referringUserId={user?.referringUserId}
+            handleUpdateReferralCode={handleUpdateReferralCode}
+          />
 
           {/* Connected Accounts Section */}
           <section className="space-y-4">
@@ -484,6 +558,70 @@ export function AccountContent() {
               </CardContent>
             </Card>
           </section>
+
+          {/* Subscription Section (displayed only if user is not EAP) */}
+          {user?.earlyAccess && IS_SUBSCRIPTION_ENABLED ? (
+            <section className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                Subscription Management
+              </h2>
+              <Card className="bg-sidebar">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <p className="text-sm">
+                            EAP Status - subscription not required ❤️
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          ) : activeWallet && IS_SUBSCRIPTION_ENABLED ? (
+            <SubscriptionSection
+              isSubscribed={user?.subscription?.active ?? false}
+              nextPaymentDate={
+                user?.subscription?.nextPaymentDate
+                  ? new Date(user?.subscription?.nextPaymentDate)
+                  : undefined
+              }
+              endDate={
+                user?.subscription?.endDate
+                  ? new Date(user?.subscription?.endDate)
+                  : undefined
+              }
+              wallet={activeWallet}
+              paymentHistory={user?.subscription?.payments}
+              onSubscribe={handleSubscribe}
+              onUnsubscribe={handleUnsubscribe}
+              onReactivate={handleReactivate}
+            />
+          ) : IS_SUBSCRIPTION_ENABLED ? (
+            <section className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                Subscription Management
+              </h2>
+              <Card className="bg-sidebar">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <p className="text-sm font-medium">
+                            Please ensure you have an active embedded wallet.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          ) : null}
 
           {/* Privy Embedded Wallet Section */}
           <section className="space-y-4">

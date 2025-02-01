@@ -53,6 +53,7 @@ import { useUser } from '@/hooks/use-user';
 import { NO_CONFIRMATION_MESSAGE } from '@/lib/constants';
 import { EVENTS } from '@/lib/events';
 import { cn } from '@/lib/utils';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 interface ActionMenuItemProps {
@@ -123,16 +124,23 @@ const ActionMenuItem = ({ action, onDelete, onEdit }: ActionMenuItemProps) => {
   };
 
   // Show warning if action has failed more recently than last success
-  const hasWarning = !!(action.lastFailureAt && action.lastSuccessAt && action.lastFailureAt > action.lastSuccessAt);
+  const hasWarning = !!(
+    action.lastFailureAt &&
+    action.lastSuccessAt &&
+    action.lastFailureAt > action.lastSuccessAt
+  );
 
   // Show error is action has failed and never succeeded
   const hasError = !!(action.lastFailureAt && !action.lastSuccessAt);
 
   // Show success if action has succeeded more recently than last failure
-  const hasSuccess = !!(action.lastSuccessAt && (!action.lastFailureAt || action.lastSuccessAt > action.lastFailureAt));
+  const hasSuccess = !!(
+    action.lastSuccessAt &&
+    (!action.lastFailureAt || action.lastSuccessAt > action.lastFailureAt)
+  );
 
   // Show pending if action has never succeeded or failed
-  const hasPending = !!(!action.lastExecutedAt);
+  const hasPending = !!!action.lastExecutedAt;
 
   return (
     <>
@@ -142,21 +150,21 @@ const ActionMenuItem = ({ action, onDelete, onEdit }: ActionMenuItemProps) => {
             {hasWarning && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-warning" />
                 </TooltipTrigger>
               </Tooltip>
             )}
             {hasError && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <CircleX className="h-4 w-4 text-destructive shrink-0" />
+                  <CircleX className="h-4 w-4 shrink-0 text-destructive" />
                 </TooltipTrigger>
               </Tooltip>
             )}
             {hasSuccess && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <CircleCheck className="h-4 w-4 text-success shrink-0" />
+                  <CircleCheck className="h-4 w-4 shrink-0 text-success" />
                 </TooltipTrigger>
               </Tooltip>
             )}
