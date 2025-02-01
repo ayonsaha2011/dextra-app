@@ -48,7 +48,7 @@ export default function RootLayout({
         <AuthProviders>
           <ThemeProvider
             attribute="class"
-            defaultTheme="light"
+            defaultTheme="dark"
             disableTransitionOnChange
           >
             <main className="sticky bottom-0 overflow-hidden md:overflow-visible">
